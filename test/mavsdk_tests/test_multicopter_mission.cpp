@@ -34,6 +34,15 @@
 #include "autopilot_tester.h"
 #include <chrono>
 
+TEST_CASE("Arm", "[arm]")
+{
+	AutopilotTester tester;
+	tester.connect(connection_url);
+	tester.wait_until_armable();
+	tester.arm();
+	std::chrono::seconds until_disarmed_timeout = std::chrono::seconds(180);
+	tester.wait_until_disarmed(until_disarmed_timeout);
+}
 
 TEST_CASE("Takeoff and Land", "[multicopter][vtol]")
 {

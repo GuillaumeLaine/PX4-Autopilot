@@ -20,6 +20,12 @@
             }
         },
         {
+            "model": "iris_opt_flow",
+            "vehicle": "iris_opt_flow",
+            "test_filter": "[arm]",
+            "timeout_min": 10
+        },
+        {
             "model": "standard_vtol",
             "vehicle": "standard_vtol",
             "test_filter": "[vtol]",

@@ -100,6 +100,7 @@ public:
 	 * @brief Wait until vehicle's system status is healthy & is able to arm
 	 */
 	void wait_until_ready();
+	void wait_until_armable();
 
 	void store_home();
 	void check_home_within(float acceptance_radius_m);
