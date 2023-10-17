@@ -48,6 +48,9 @@ publications:
     type: px4_msgs::msg::VehicleTrajectoryWaypoint
 
 # Create uORB::Publication
+  - topic: /fmu/out/vehicle_optical_flow
+    type: px4_msgs::msg::VehicleOpticalFlow
+
 subscriptions:
 
   - topic: /fmu/in/offboard_control_mode
@@ -91,3 +94,6 @@ subscriptions:
 
 # Create uORB::PublicationMulti
 subscriptions_multi:
+
+  - topic: /fmu/in/vehicle_optical_flow_vel
+    type: px4_msgs::msg::VehicleOpticalFlowVel
