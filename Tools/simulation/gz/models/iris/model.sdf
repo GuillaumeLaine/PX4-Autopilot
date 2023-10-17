@@ -42,15 +42,35 @@
             <uri>model://iris/meshes/iris.stl</uri>
           </mesh>
         </geometry>
-        <material>
+        <!-- <material>
           <script>
             <name>Gazebo/DarkGrey</name>
             <uri>file://media/materials/scripts/gazebo.material</uri>
           </script>
+        </material> -->
+        <material>
+          <diffuse>0.75 0.75 0.75</diffuse>
+          <specular>0.75 0.75 0.75</specular>
         </material>
       </visual>
       <gravity>1</gravity>
       <velocity_decay/>
+      <sensor name="imu_sensor" type="imu">
+        <always_on>1</always_on>
+        <update_rate>250</update_rate>
+      </sensor>
+      <sensor name="air_pressure_sensor" type="air_pressure">
+        <always_on>1</always_on>
+        <update_rate>50</update_rate>
+        <air_pressure>
+          <pressure>
+            <noise type="gaussian">
+              <mean>0</mean>
+              <stddev>0.01</stddev>
+            </noise>
+          </pressure>
+        </air_pressure>
+      </sensor>
     </link>
     <link name='/imu_link'>
       <pose>0 0 0.02 0 0 0</pose>
@@ -124,11 +144,15 @@
             <uri>model://iris/meshes/iris_prop_ccw.dae</uri>
           </mesh>
         </geometry>
-        <material>
+        <!-- <material>
           <script>
             <name>Gazebo/Blue</name>
             <uri>file://media/materials/scripts/gazebo.material</uri>
           </script>
+        </material> -->
+        <material>
+          <diffuse>0.1 0.1 0.1</diffuse>
+          <specular>0.1 0.1 0.1</specular>
         </material>
       </visual>
       <gravity>1</gravity>
@@ -189,11 +213,15 @@
             <uri>model://iris/meshes/iris_prop_ccw.dae</uri>
           </mesh>
         </geometry>
-        <material>
+        <!-- <material>
           <script>
             <name>Gazebo/DarkGrey</name>
             <uri>file://media/materials/scripts/gazebo.material</uri>
           </script>
+        </material> -->
+        <material>
+          <diffuse>0.1 0.1 0.1</diffuse>
+          <specular>0.1 0.1 0.1</specular>
         </material>
       </visual>
       <gravity>1</gravity>
@@ -254,11 +282,15 @@
             <uri>model://iris/meshes/iris_prop_cw.dae</uri>
           </mesh>
         </geometry>
-        <material>
+        <!-- <material>
           <script>
             <name>Gazebo/Blue</name>
             <uri>file://media/materials/scripts/gazebo.material</uri>
           </script>
+        </material> -->
+        <material>
+          <diffuse>0.1 0.1 0.1</diffuse>
+          <specular>0.1 0.1 0.1</specular>
         </material>
       </visual>
       <gravity>1</gravity>
@@ -319,11 +351,15 @@
             <uri>model://iris/meshes/iris_prop_cw.dae</uri>
           </mesh>
         </geometry>
-        <material>
+        <!-- <material>
           <script>
             <name>Gazebo/DarkGrey</name>
             <uri>file://media/materials/scripts/gazebo.material</uri>
           </script>
+        </material> -->
+        <material>
+          <diffuse>0.1 0.1 0.1</diffuse>
+          <specular>0.1 0.1 0.1</specular>
         </material>
       </visual>
       <gravity>1</gravity>
@@ -345,13 +381,14 @@
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
     </joint>
-    <plugin name='rosbag' filename='libgazebo_multirotor_base_plugin.so'>
+    <!-- <plugin name='rosbag' filename='libgazebo_multirotor_base_plugin.so'>
       <robotNamespace/>
       <linkName>base_link</linkName>
       <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
-    </plugin>
-    <plugin name='front_right_motor_model' filename='libgazebo_motor_model.so'>
-      <robotNamespace/>
+    </plugin> -->
+    <!-- <plugin name='front_right_motor_model' filename='libgazebo_motor_model.so'> -->
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <!-- <robotNamespace/> -->
       <jointName>rotor_0_joint</jointName>
       <linkName>rotor_0</linkName>
       <turningDirection>ccw</turningDirection>
@@ -360,15 +397,18 @@
       <maxRotVelocity>1100</maxRotVelocity>
       <motorConstant>5.84e-06</motorConstant>
       <momentConstant>0.06</momentConstant>
-      <commandSubTopic>/gazebo/command/motor_speed</commandSubTopic>
+      <!-- <commandSubTopic>/gazebo/command/motor_speed</commandSubTopic> -->
+      <commandSubTopic>command/motor_speed</commandSubTopic>
       <motorNumber>0</motorNumber>
       <rotorDragCoefficient>0.000175</rotorDragCoefficient>
       <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
-      <motorSpeedPubTopic>/motor_speed/0</motorSpeedPubTopic>
+      <!-- <motorSpeedPubTopic>/motor_speed/0</motorSpeedPubTopic> -->
+      <motorType>velocity</motorType>
       <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
     </plugin>
-    <plugin name='back_left_motor_model' filename='libgazebo_motor_model.so'>
-      <robotNamespace/>
+    <!-- <plugin name='back_left_motor_model' filename='libgazebo_motor_model.so'> -->
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <!-- <robotNamespace/> -->
       <jointName>rotor_1_joint</jointName>
       <linkName>rotor_1</linkName>
       <turningDirection>ccw</turningDirection>
@@ -377,15 +417,18 @@
       <maxRotVelocity>1100</maxRotVelocity>
       <motorConstant>5.84e-06</motorConstant>
       <momentConstant>0.06</momentConstant>
-      <commandSubTopic>/gazebo/command/motor_speed</commandSubTopic>
+      <!-- <commandSubTopic>/gazebo/command/motor_speed</commandSubTopic> -->
+      <commandSubTopic>command/motor_speed</commandSubTopic>
       <motorNumber>1</motorNumber>
       <rotorDragCoefficient>0.000175</rotorDragCoefficient>
       <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
-      <motorSpeedPubTopic>/motor_speed/1</motorSpeedPubTopic>
+      <!-- <motorSpeedPubTopic>/motor_speed/1</motorSpeedPubTopic> -->
+      <motorType>velocity</motorType>
       <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
     </plugin>
-    <plugin name='front_left_motor_model' filename='libgazebo_motor_model.so'>
-      <robotNamespace/>
+    <!-- <plugin name='front_left_motor_model' filename='libgazebo_motor_model.so'> -->
+      <!-- <robotNamespace/> -->
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
       <jointName>rotor_2_joint</jointName>
       <linkName>rotor_2</linkName>
       <turningDirection>cw</turningDirection>
@@ -394,15 +437,18 @@
       <maxRotVelocity>1100</maxRotVelocity>
       <motorConstant>5.84e-06</motorConstant>
       <momentConstant>0.06</momentConstant>
-      <commandSubTopic>/gazebo/command/motor_speed</commandSubTopic>
+      <!-- <commandSubTopic>/gazebo/command/motor_speed</commandSubTopic> -->
+      <commandSubTopic>command/motor_speed</commandSubTopic>
       <motorNumber>2</motorNumber>
       <rotorDragCoefficient>0.000175</rotorDragCoefficient>
       <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
-      <motorSpeedPubTopic>/motor_speed/2</motorSpeedPubTopic>
+      <!-- <motorSpeedPubTopic>/motor_speed/2</motorSpeedPubTopic> -->
+      <motorType>velocity</motorType>
       <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
     </plugin>
-    <plugin name='back_right_motor_model' filename='libgazebo_motor_model.so'>
-      <robotNamespace/>
+    <!-- <plugin name='back_right_motor_model' filename='libgazebo_motor_model.so'> -->
+      <!-- <robotNamespace/> -->
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
       <jointName>rotor_3_joint</jointName>
       <linkName>rotor_3</linkName>
       <turningDirection>cw</turningDirection>
@@ -411,11 +457,13 @@
       <maxRotVelocity>1100</maxRotVelocity>
       <motorConstant>5.84e-06</motorConstant>
       <momentConstant>0.06</momentConstant>
-      <commandSubTopic>/gazebo/command/motor_speed</commandSubTopic>
+      <!-- <commandSubTopic>/gazebo/command/motor_speed</commandSubTopic> -->
+      <commandSubTopic>command/motor_speed</commandSubTopic>
       <motorNumber>3</motorNumber>
       <rotorDragCoefficient>0.000175</rotorDragCoefficient>
       <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
-      <motorSpeedPubTopic>/motor_speed/3</motorSpeedPubTopic>
+      <!-- <motorSpeedPubTopic>/motor_speed/3</motorSpeedPubTopic> -->
+      <motorType>velocity</motorType>
       <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
     </plugin>
     <!-- <include>
@@ -427,7 +475,7 @@
       <child>gps0::link</child>
       <parent>base_link</parent>
     </joint> -->
-    <plugin name='groundtruth_plugin' filename='libgazebo_groundtruth_plugin.so'>
+    <!-- <plugin name='groundtruth_plugin' filename='libgazebo_groundtruth_plugin.so'>
       <robotNamespace/>
     </plugin>
     <plugin name='magnetometer_plugin' filename='libgazebo_magnetometer_plugin.so'>
@@ -443,8 +491,8 @@
       <pubRate>50</pubRate>
       <baroTopic>/baro</baroTopic>
       <baroDriftPaPerSec>0</baroDriftPaPerSec>
-    </plugin>
-    <plugin name='mavlink_interface' filename='libgazebo_mavlink_interface.so'>
+    </plugin> -->
+    <!-- <plugin name='mavlink_interface' filename='libgazebo_mavlink_interface.so'>
       <robotNamespace/>
       <imuSubTopic>/imu</imuSubTopic>
       <magSubTopic>/mag</magSubTopic>
@@ -562,9 +610,9 @@
           <joint_control_type>position</joint_control_type>
         </channel>
       </control_channels>
-    </plugin>
+    </plugin> -->
     <static>0</static>
-    <plugin name='rotors_gazebo_imu_plugin' filename='libgazebo_imu_plugin.so'>
+    <!-- <plugin name='rotors_gazebo_imu_plugin' filename='libgazebo_imu_plugin.so'>
       <robotNamespace/>
       <linkName>/imu_link</linkName>
       <imuTopic>/imu</imuTopic>
@@ -576,6 +624,6 @@
       <accelerometerRandomWalk>0.006</accelerometerRandomWalk>
       <accelerometerBiasCorrelationTime>300.0</accelerometerBiasCorrelationTime>
       <accelerometerTurnOnBiasSigma>0.196</accelerometerTurnOnBiasSigma>
-    </plugin>
+    </plugin> -->
   </model>
 </sdf>
