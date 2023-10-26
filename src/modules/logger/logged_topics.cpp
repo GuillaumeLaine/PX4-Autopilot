@@ -218,7 +218,7 @@ void LoggedTopics::add_default_topics()
 	add_topic_multi("vehicle_imu_status", 1000, 4);
 	add_optional_topic_multi("vehicle_magnetometer", 500, 4);
 	add_topic("vehicle_optical_flow", 500);
-	//add_optional_topic("vehicle_optical_flow_vel", 100);
+	add_topic_multi("vehicle_optical_flow_vel", 100, 3);
 	add_optional_topic("pps_capture");
 
 	// additional control allocation logging

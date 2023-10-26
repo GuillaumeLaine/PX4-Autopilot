@@ -47,6 +47,7 @@
 #include <px4_platform_common/px4_config.h>
 #include <px4_platform_common/px4_work_queue/ScheduledWorkItem.hpp>
 #include <uORB/Publication.hpp>
+#include <uORB/PublicationMulti.hpp>
 #include <uORB/Subscription.hpp>
 #include <uORB/SubscriptionCallback.hpp>
 #include <uORB/SubscriptionMultiArray.hpp>
@@ -86,7 +87,8 @@ private:
 	static constexpr int MAX_SENSOR_COUNT = 3;
 
 	uORB::Publication<vehicle_optical_flow_s> _vehicle_optical_flow_pub{ORB_ID(vehicle_optical_flow)};
-	uORB::Publication<vehicle_optical_flow_vel_s> _vehicle_optical_flow_vel_pub{ORB_ID(vehicle_optical_flow_vel)};
+	// uORB::Publication<vehicle_optical_flow_vel_s> _vehicle_optical_flow_vel_pub{ORB_ID(vehicle_optical_flow_vel)};
+	uORB::PublicationMulti<vehicle_optical_flow_vel_s> _vehicle_optical_flow_vel_pub {ORB_ID(vehicle_optical_flow_vel)};
 
 	uORB::Subscription _params_sub{ORB_ID(parameter_update)};
 
