@@ -47,10 +47,10 @@ publications:
   - topic: /fmu/out/vehicle_trajectory_waypoint_desired
     type: px4_msgs::msg::VehicleTrajectoryWaypoint
 
-# Create uORB::Publication
   - topic: /fmu/out/vehicle_optical_flow
     type: px4_msgs::msg::VehicleOpticalFlow
 
+# Create uORB::Publication
 subscriptions:
 
   - topic: /fmu/in/offboard_control_mode
