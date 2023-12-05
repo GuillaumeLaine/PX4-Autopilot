@@ -71,7 +71,7 @@
 # include "sensor_range_finder.hpp"
 #endif // CONFIG_EKF2_RANGE_FINDER
 
-#include <lib/geo/geo.h>
+#include <lib/atmosphere/atmosphere.h>
 #include <matrix/math.hpp>
 #include <mathlib/mathlib.h>
 #include <mathlib/math/filter/AlphaFilter.hpp>
@@ -120,7 +120,7 @@ public:
 #endif // CONFIG_EKF2_RANGE_FINDER
 
 #if defined(CONFIG_EKF2_OPTICAL_FLOW)
-	// if optical flow sensor gyro delta angles are not available, set gyro_xyz vector fields to NaN and the EKF will use its internal delta angle data instead
+	// if optical flow sensor gyro delta angles are not available, set gyro_rate vector fields to NaN and the EKF will use its internal gyro data instead
 	void setOpticalFlowData(const flowSample &flow);
 
 	// set sensor limitations reported by the optical flow sensor
@@ -284,6 +284,9 @@ public:
 	const filter_control_status_u &control_status_prev() const { return _control_status_prev; }
 	const decltype(filter_control_status_u::flags) &control_status_prev_flags() const { return _control_status_prev.flags; }
 
+	void enableControlStatusAuxGpos() { _control_status.flags.aux_gpos = true; }
+	void disableControlStatusAuxGpos() { _control_status.flags.aux_gpos = false; }
+
 	// get EKF internal fault status
 	const fault_status_u &fault_status() const { return _fault_status; }
 	const decltype(fault_status_u::flags) &fault_status_flags() const { return _fault_status.flags; }
@@ -374,7 +377,7 @@ protected:
 	float _flow_max_distance{10.f};	///< maximum distance that the optical flow sensor can operate at (m)
 #endif // CONFIG_EKF2_OPTICAL_FLOW
 
-	float _air_density{CONSTANTS_AIR_DENSITY_SEA_LEVEL_15C};		// air density (kg/m**3)
+	float _air_density{atmosphere::kAirDensitySeaLevelStandardAtmos};		// air density (kg/m**3)
 
 	bool _imu_updated{false};      // true if the ekf should update (completed downsampling process)
 	bool _initialised{false};      // true if the ekf interface instance (data buffering) is initialized

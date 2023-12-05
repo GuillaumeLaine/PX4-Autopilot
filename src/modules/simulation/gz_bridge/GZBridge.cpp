@@ -35,7 +35,7 @@
 
 #include <uORB/Subscription.hpp>
 
-#include <lib/geo/geo.h>
+#include <lib/atmosphere/atmosphere.h>
 #include <lib/mathlib/mathlib.h>
 
 #include <px4_platform_common/getopt.h>
@@ -93,6 +93,12 @@ int GZBridge::init()
 
 			while (model_pose_v.size() < 6) {
 				model_pose_v.push_back(0.0);
+			}
+
+			// If model position z is less equal than 0, move above floor to prevent floor glitching
+			if (model_pose_v[2] <= 0.0) {
+				PX4_INFO("Model position z is less or equal 0.0, moving upwards");
+				model_pose_v[2] = 1.0;
 			}
 
 			gz::msgs::Pose *p = req.mutable_pose();
@@ -388,7 +394,7 @@ void GZBridge::airspeedCallback(const gz::msgs::AirSpeedSensor &air_speed)
 	report.timestamp_sample = time_us;
 	report.device_id = 1377548; // 1377548: DRV_DIFF_PRESS_DEVTYPE_SIM, BUS: 1, ADDR: 5, TYPE: SIMULATION
 	report.differential_pressure_pa = static_cast<float>(air_speed_value); // hPa to Pa;
-	report.temperature = static_cast<float>(air_speed.temperature()) + CONSTANTS_ABSOLUTE_NULL_CELSIUS; // K to C
+	report.temperature = static_cast<float>(air_speed.temperature()) + atmosphere::kAbsoluteNullCelsius; // K to C
 	report.timestamp = hrt_absolute_time();;
 	_differential_pressure_pub.publish(report);
 

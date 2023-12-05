@@ -68,7 +68,7 @@ void Ekf::controlFusionModes(const imuSample &imu_delayed)
 	// monitor the tilt alignment
 	if (!_control_status.flags.tilt_align) {
 		// whilst we are aligning the tilt, monitor the variances
-		const Vector3f angle_err_var_vec = calcRotVecVariances();
+		const Vector3f angle_err_var_vec = getQuaternionVariance();
 
 		// Once the tilt variances have reduced to equivalent of 3deg uncertainty
 		// and declare the tilt alignment complete
@@ -114,6 +114,10 @@ void Ekf::controlFusionModes(const imuSample &imu_delayed)
 #if defined(CONFIG_EKF2_GNSS)
 	controlGpsFusion(imu_delayed);
 #endif // CONFIG_EKF2_GNSS
+
+#if defined(CONFIG_EKF2_AUX_GLOBAL_POSITION) && defined(MODULE_NAME)
+	_aux_global_position.update(*this, imu_delayed);
+#endif // CONFIG_EKF2_AUX_GLOBAL_POSITION
 
 #if defined(CONFIG_EKF2_AIRSPEED)
 	controlAirDataFusion(imu_delayed);

@@ -225,11 +225,10 @@ struct airspeedSample {
 };
 
 struct flowSample {
-	uint64_t    time_us{};     ///< timestamp of the integration period leading edge (uSec)
-	Vector2f    flow_xy_rad{}; ///< measured delta angle of the image about the X and Y body axes (rad), RH rotation is positive
-	Vector3f    gyro_xyz{};    ///< measured delta angle of the inertial frame about the body axes obtained from rate gyro measurements (rad), RH rotation is positive
-	float       dt{};          ///< amount of integration time (sec)
-	uint8_t     quality{};     ///< quality indicator between 0 and 255
+	uint64_t    time_us{};   ///< timestamp of the integration period midpoint (uSec)
+	Vector2f    flow_rate{}; ///< measured angular rate of the image about the X and Y body axes (rad/s), RH rotation is positive
+	Vector3f    gyro_rate{}; ///< measured angular rate of the inertial frame about the body axes obtained from rate gyro measurements (rad/s), RH rotation is positive
+	uint8_t     quality{};   ///< quality indicator between 0 and 255
 };
 
 #if defined(CONFIG_EKF2_EXTERNAL_VISION)
@@ -615,6 +614,7 @@ union filter_control_status_u {
 		uint64_t mag                     : 1; ///< 35 - true if 3-axis magnetometer measurement fusion (mag states only) is intended
 		uint64_t ev_yaw_fault            : 1; ///< 36 - true when the EV heading has been declared faulty and is no longer being used
 		uint64_t mag_heading_consistent  : 1; ///< 37 - true when the heading obtained from mag data is declared consistent with the filter
+		uint64_t aux_gpos                : 1;
 
 	} flags;
 	uint64_t value;

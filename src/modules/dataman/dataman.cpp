@@ -574,10 +574,13 @@ _file_initialize(unsigned max_offset)
 		mission.dataman_id = DM_KEY_WAYPOINTS_OFFBOARD_0;
 		mission.count = 0;
 		mission.current_seq = 0;
+		mission.mission_id = 0u;
+		mission.geofence_id = 0u;
+		mission.safe_points_id = 0u;
 
 		mission_stats_entry_s stats;
 		stats.num_items = 0;
-		stats.update_counter = 1;
+		stats.opaque_id = 0;
 
 		g_dm_ops->write(DM_KEY_MISSION_STATE, 0, reinterpret_cast<uint8_t *>(&mission), sizeof(mission_s));
 		g_dm_ops->write(DM_KEY_FENCE_POINTS, 0, reinterpret_cast<uint8_t *>(&stats), sizeof(mission_stats_entry_s));
@@ -991,7 +994,7 @@ dataman_main(int argc, char *argv[])
 }
 
 static_assert(sizeof(dataman_request_s::data) == sizeof(dataman_response_s::data), "request and response data are not the same size");
-static_assert(sizeof(dataman_response_s::data) >= MISSION_SAFE_POINT_SIZE, "mission_safe_point_s can't fit in the response data");
+static_assert(sizeof(dataman_response_s::data) >= MISSION_SAFE_POINT_SIZE, "mission_item_s can't fit in the response data");
 static_assert(sizeof(dataman_response_s::data) >= MISSION_FENCE_POINT_SIZE, "mission_fance_point_s can't fit in the response data");
 static_assert(sizeof(dataman_response_s::data) >= MISSION_ITEM_SIZE, "mission_item_s can't fit in the response data");
 static_assert(sizeof(dataman_response_s::data) >= MISSION_SIZE, "mission_s can't fit in the response data");

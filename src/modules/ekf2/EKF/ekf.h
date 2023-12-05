@@ -62,6 +62,10 @@
 #include "aid_sources/ZeroGyroUpdate.hpp"
 #include "aid_sources/ZeroVelocityUpdate.hpp"
 
+#if defined(CONFIG_EKF2_AUX_GLOBAL_POSITION)
+# include "aux_global_position.hpp"
+#endif // CONFIG_EKF2_AUX_GLOBAL_POSITION
+
 enum class Likelihood { LOW, MEDIUM, HIGH };
 
 class Ekf final : public EstimatorInterface
@@ -83,8 +87,6 @@ public:
 
 	// should be called every time new data is pushed into the filter
 	bool update();
-
-	static uint8_t getNumberOfStates() { return State::size; }
 
 	const StateSample &state() const { return _state; }
 
@@ -134,14 +136,12 @@ public:
 	const Vector2f &getFlowVelBody() const { return _flow_vel_body; }
 	const Vector2f &getFlowVelNE() const { return _flow_vel_ne; }
 
-	const Vector2f &getFlowCompensated() const { return _flow_compensated_XY_rad; }
-	const Vector2f &getFlowUncompensated() const { return _flow_sample_delayed.flow_xy_rad; }
+	const Vector2f &getFlowCompensated() const { return _flow_rate_compensated; }
+	const Vector2f &getFlowUncompensated() const { return _flow_sample_delayed.flow_rate; }
 
-	const Vector3f getFlowGyro() const { return _flow_sample_delayed.gyro_xyz * (1.f / _flow_sample_delayed.dt); }
-	const Vector3f &getFlowGyroIntegral() const { return _flow_sample_delayed.gyro_xyz; }
+	const Vector3f getFlowGyro() const { return _flow_sample_delayed.gyro_rate; }
 	const Vector3f &getFlowGyroBias() const { return _flow_gyro_bias; }
 	const Vector3f &getRefBodyRate() const { return _ref_body_rate; }
-	const Vector3f &getMeasuredBodyRate() const { return _measured_body_rate; }
 #endif // CONFIG_EKF2_OPTICAL_FLOW
 
 	float getHeadingInnov() const
@@ -233,9 +233,6 @@ public:
 	const auto &aid_src_gravity() const { return _aid_src_gravity; }
 #endif // CONFIG_EKF2_GRAVITY_FUSION
 
-	// get the state vector at the delayed time horizon
-	const matrix::Vector<float, State::size> &getStateAtFusionHorizonAsVector() const { return _state.vector(); }
-
 #if defined(CONFIG_EKF2_WIND)
 	// get the wind velocity in m/s
 	const Vector2f &getWindVelocity() const { return _state.wind_vel; };
@@ -262,7 +259,7 @@ public:
 	// get the ekf WGS-84 origin position and height and the system time it was last set
 	// return true if the origin is valid
 	bool getEkfGlobalOrigin(uint64_t &origin_time, double &latitude, double &longitude, float &origin_alt) const;
-	bool setEkfGlobalOrigin(const double latitude, const double longitude, const float altitude);
+	bool setEkfGlobalOrigin(double latitude, double longitude, float altitude, float eph = 0.f, float epv = 0.f);
 
 	// get the 1-sigma horizontal and vertical position uncertainty of the ekf WGS-84 position
 	void get_ekf_gpos_accuracy(float *ekf_eph, float *ekf_epv) const;
@@ -408,8 +405,6 @@ public:
 	// return a bitmask integer that describes which state estimates can be used for flight control
 	void get_ekf_soln_status(uint16_t *status) const;
 
-	// rotate quaternion covariances into variances for an equivalent rotation vector
-	Vector3f calcRotVecVariances() const;
 	float getYawVar() const;
 
 	uint8_t getHeightSensorRef() const { return _height_sensor_ref; }
@@ -476,7 +471,6 @@ public:
 	const auto &aid_src_aux_vel() const { return _aid_src_aux_vel; }
 #endif // CONFIG_EKF2_AUXVEL
 
-
 	bool measurementUpdate(VectorState &K, float innovation_variance, float innovation)
 	{
 		clearInhibitedStateKalmanGains(K);
@@ -506,6 +500,10 @@ public:
 
 		return is_healthy;
 	}
+
+	void updateParameters();
+
+	friend class AuxGlobalPosition;
 
 private:
 
@@ -607,14 +605,9 @@ private:
 	Vector3f _flow_gyro_bias{};	///< bias errors in optical flow sensor rate gyro outputs (rad/sec)
 	Vector2f _flow_vel_body{};	///< velocity from corrected flow measurement (body frame)(m/s)
 	Vector2f _flow_vel_ne{};		///< velocity from corrected flow measurement (local frame) (m/s)
-	Vector3f _imu_del_ang_of{};	///< bias corrected delta angle measurements accumulated across the same time frame as the optical flow rates (rad)
 	Vector3f _ref_body_rate{};
-	Vector3f _measured_body_rate{};
 
-	float _delta_time_of{0.0f};	///< time in sec that _imu_del_ang_of was accumulated over (sec)
-	uint64_t _time_bad_motion_us{0};	///< last system time that on-ground motion exceeded limits (uSec)
-	uint64_t _time_good_motion_us{0};	///< last system time that on-ground motion was within limits (uSec)
-	Vector2f _flow_compensated_XY_rad{};	///< measured delta angle of the image about the X and Y body axes after removal of body rotation (rad), RH rotation is positive
+	Vector2f _flow_rate_compensated{}; ///< measured angular rate of the image about the X and Y body axes after removal of body rotation (rad/s), RH rotation is positive
 
 	bool _flow_data_ready{false};	///< true when the leading edge of the optical flow integration period has fallen behind the fusion time horizon
 #endif // CONFIG_EKF2_OPTICAL_FLOW
@@ -886,6 +879,8 @@ private:
 #if defined(CONFIG_EKF2_OPTICAL_FLOW)
 	// control fusion of optical flow observations
 	void controlOpticalFlowFusion(const imuSample &imu_delayed);
+	void startFlowFusion();
+	void resetFlowFusion();
 	void stopFlowFusion();
 
 	void updateOnGroundMotionForOpticalFlowChecks();
@@ -895,8 +890,7 @@ private:
 	float calcOptFlowMeasVar(const flowSample &flow_sample);
 
 	// calculate optical flow body angular rate compensation
-	// returns false if bias corrected body rate data is unavailable
-	bool calcOptFlowBodyRateComp();
+	void calcOptFlowBodyRateComp(const imuSample &imu_delayed);
 
 	// fuse optical flow line of sight rate measurements
 	void updateOptFlow(estimator_aid_source2d_s &aid_src);
@@ -1241,6 +1235,10 @@ private:
 
 	ZeroGyroUpdate _zero_gyro_update{};
 	ZeroVelocityUpdate _zero_velocity_update{};
+
+#if defined(CONFIG_EKF2_AUX_GLOBAL_POSITION) && defined(MODULE_NAME)
+	AuxGlobalPosition _aux_global_position{};
+#endif // CONFIG_EKF2_AUX_GLOBAL_POSITION
 };
 
 #endif // !EKF_EKF_H
