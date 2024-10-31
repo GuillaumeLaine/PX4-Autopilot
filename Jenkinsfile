@@ -9,7 +9,7 @@ pipeline {
         anyOf {
           branch 'main'
           branch 'master' // should be removed, but in case there is something going on...
-          branch 'pr-jenkins' // for testing
+          branch 'test-jenkins' // for testing
         }
       }
       parallel {
